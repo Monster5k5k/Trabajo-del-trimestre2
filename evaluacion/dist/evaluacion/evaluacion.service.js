@@ -18,12 +18,27 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const alumno_entity_1 = require("./entities/alumno.entity");
 const practica_entity_1 = require("./entities/practica.entity");
+const profesor_entity_1 = require("./entities/profesor.entity");
+const examen_teorico_entity_1 = require("./entities/examen-teorico.entity");
+const realiza_entity_1 = require("./entities/realiza.entity");
+const hace_entity_1 = require("./entities/hace.entity");
+const disena_entity_1 = require("./entities/disena.entity");
 let EvaluacionService = class EvaluacionService {
     alumnoRepo;
     practicaRepo;
-    constructor(alumnoRepo, practicaRepo) {
+    profesorRepo;
+    examenTeoricoRepo;
+    realizaRepo;
+    haceRepo;
+    disenaRepo;
+    constructor(alumnoRepo, practicaRepo, profesorRepo, examenTeoricoRepo, realizaRepo, haceRepo, disenaRepo) {
         this.alumnoRepo = alumnoRepo;
         this.practicaRepo = practicaRepo;
+        this.profesorRepo = profesorRepo;
+        this.examenTeoricoRepo = examenTeoricoRepo;
+        this.realizaRepo = realizaRepo;
+        this.haceRepo = haceRepo;
+        this.disenaRepo = disenaRepo;
     }
     async crearAlumno(dto) {
         const nuevo = this.alumnoRepo.create(dto);
@@ -39,13 +54,58 @@ let EvaluacionService = class EvaluacionService {
     async obtenerPracticas() {
         return this.practicaRepo.find();
     }
+    async crearProfesor(dto) {
+        const nuevo = this.profesorRepo.create(dto);
+        return this.profesorRepo.save(nuevo);
+    }
+    async obtenerProfesores() {
+        return this.profesorRepo.find({ relations: ['examenes', 'disenos'] });
+    }
+    async crearExamenTeorico(dto) {
+        const nuevo = this.examenTeoricoRepo.create(dto);
+        return this.examenTeoricoRepo.save(nuevo);
+    }
+    async obtenerExamenesTeoricos() {
+        return this.examenTeoricoRepo.find({ relations: ['profesor', 'relacionAlumnos'] });
+    }
+    async crearRealiza(dto) {
+        const nuevo = this.realizaRepo.create(dto);
+        return this.realizaRepo.save(nuevo);
+    }
+    async obtenerRealizaciones() {
+        return this.realizaRepo.find({ relations: ['alumno', 'practica'] });
+    }
+    async crearHace(dto) {
+        const nuevo = this.haceRepo.create(dto);
+        return this.haceRepo.save(nuevo);
+    }
+    async obtenerHaces() {
+        return this.haceRepo.find({ relations: ['alumno', 'examen'] });
+    }
+    async crearDisena(dto) {
+        const nuevo = this.disenaRepo.create(dto);
+        return this.disenaRepo.save(nuevo);
+    }
+    async obtenerDisenos() {
+        return this.disenaRepo.find({ relations: ['profesor', 'practica'] });
+    }
 };
 exports.EvaluacionService = EvaluacionService;
 exports.EvaluacionService = EvaluacionService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(alumno_entity_1.Alumno)),
     __param(1, (0, typeorm_1.InjectRepository)(practica_entity_1.Practica)),
+    __param(2, (0, typeorm_1.InjectRepository)(profesor_entity_1.Profesor)),
+    __param(3, (0, typeorm_1.InjectRepository)(examen_teorico_entity_1.ExamenTeorico)),
+    __param(4, (0, typeorm_1.InjectRepository)(realiza_entity_1.Realiza)),
+    __param(5, (0, typeorm_1.InjectRepository)(hace_entity_1.Hace)),
+    __param(6, (0, typeorm_1.InjectRepository)(disena_entity_1.Disena)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
+        typeorm_2.Repository,
+        typeorm_2.Repository,
+        typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository])
 ], EvaluacionService);
 //# sourceMappingURL=evaluacion.service.js.map

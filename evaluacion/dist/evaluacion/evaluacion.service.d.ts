@@ -1,13 +1,33 @@
 import { Repository } from 'typeorm';
 import { Alumno } from './entities/alumno.entity';
 import { Practica } from './entities/practica.entity';
-import { CrearAlumnoDto, CrearPracticaDto } from './evaluacion.dto';
+import { Profesor } from './entities/profesor.entity';
+import { ExamenTeorico } from './entities/examen-teorico.entity';
+import { Realiza } from './entities/realiza.entity';
+import { Hace } from './entities/hace.entity';
+import { Disena } from './entities/disena.entity';
+import { CrearAlumnoDto, CrearPracticaDto, CrearProfesorDto, CrearExamenTeoricoDto, CrearRealizaDto, CrearHaceDto, CrearDisenaDto } from './evaluacion.dto';
 export declare class EvaluacionService {
     private alumnoRepo;
     private practicaRepo;
-    constructor(alumnoRepo: Repository<Alumno>, practicaRepo: Repository<Practica>);
+    private profesorRepo;
+    private examenTeoricoRepo;
+    private realizaRepo;
+    private haceRepo;
+    private disenaRepo;
+    constructor(alumnoRepo: Repository<Alumno>, practicaRepo: Repository<Practica>, profesorRepo: Repository<Profesor>, examenTeoricoRepo: Repository<ExamenTeorico>, realizaRepo: Repository<Realiza>, haceRepo: Repository<Hace>, disenaRepo: Repository<Disena>);
     crearAlumno(dto: CrearAlumnoDto): Promise<Alumno>;
     obtenerAlumnos(): Promise<Alumno[]>;
     crearPractica(dto: CrearPracticaDto): Promise<Practica>;
     obtenerPracticas(): Promise<Practica[]>;
+    crearProfesor(dto: CrearProfesorDto): Promise<Profesor>;
+    obtenerProfesores(): Promise<Profesor[]>;
+    crearExamenTeorico(dto: CrearExamenTeoricoDto): Promise<ExamenTeorico>;
+    obtenerExamenesTeoricos(): Promise<ExamenTeorico[]>;
+    crearRealiza(dto: CrearRealizaDto): Promise<Realiza>;
+    obtenerRealizaciones(): Promise<Realiza[]>;
+    crearHace(dto: CrearHaceDto): Promise<Hace>;
+    obtenerHaces(): Promise<Hace[]>;
+    crearDisena(dto: CrearDisenaDto): Promise<Disena>;
+    obtenerDisenos(): Promise<Disena[]>;
 }
