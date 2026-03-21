@@ -1,0 +1,12 @@
+# Las dependencias (son miles de archivos, se instalan con npm install)
+node_modules/
+
+# El código compilado (se genera solo al ejecutar el proyecto)
+dist/
+
+# La base de datos local (normalmente no se sube la DB con datos)
+*.sqlite
+
+# Archivos de configuración de TypeScript y logs
+*.log
+.npm
