@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThanOrEqual, LessThan } from 'typeorm';
 import { Alumno } from './entities/alumno.entity';
 import { Practica } from './entities/practica.entity';
 import { Profesor } from './entities/profesor.entity';
@@ -99,4 +99,94 @@ export class EvaluacionService {
   async obtenerDisenaPorIds(id_profesor: number, id_practica: number) { return this.disenaRepo.findOne({ where: { id_profesor, id_practica }, relations: ['profesor', 'practica'] }); }
   async actualizarDisena(id_profesor: number, id_practica: number, dto: ActualizarDisenaDto) { await this.disenaRepo.update({ id_profesor, id_practica }, dto); return this.obtenerDisenaPorIds(id_profesor, id_practica); }
   async eliminarDisena(id_profesor: number, id_practica: number) { return this.disenaRepo.delete({ id_profesor, id_practica }); }
+
+  // ================= FUNCIONES AVANZADAS (ESTADÍSTICAS Y REPORTES) =================
+
+  // 1. Obtener boletín de notas de un alumno (promedio de prácticas y exámenes)
+  async obtenerBoletinNotasAlumno(id_alumno: number) {
+    const alumno = await this.alumnoRepo.findOne({
+      where: { id: id_alumno },
+      relations: ['practicasRealizadas', 'practicasRealizadas.practica', 'examenesHechos', 'examenesHechos.examen'],
+    });
+
+    if (!alumno) return { mensaje: 'Alumno no encontrado' };
+
+    const notasPracticas = alumno.practicasRealizadas.map(p => p.nota);
+    const notasExamenes = alumno.examenesHechos.map(e => e.nota);
+
+    const promedioPracticas = notasPracticas.length > 0 ? notasPracticas.reduce((a, b) => a + b, 0) / notasPracticas.length : 0;
+    const promedioExamenes = notasExamenes.length > 0 ? notasExamenes.reduce((a, b) => a + b, 0) / notasExamenes.length : 0;
+
+    // Calculamos una nota final ponderada (Ej: 40% prácticas, 60% exámenes)
+    const notaFinal = (promedioPracticas * 0.4) + (promedioExamenes * 0.6);
+
+    return {
+      alumno: `${alumno.nombre} ${alumno.apellido1} ${alumno.apellido2}`,
+      grupo: alumno.grupo,
+      promedioPracticas: Number(promedioPracticas.toFixed(2)),
+      promedioExamenes: Number(promedioExamenes.toFixed(2)),
+      notaFinal: Number(notaFinal.toFixed(2)),
+      estado: notaFinal >= 5 ? 'Aprobado' : 'Suspenso',
+      detallesPracticas: alumno.practicasRealizadas.map(p => ({ practica: p.practica?.titulo || `ID ${p.id_practica}`, nota: p.nota, fecha: p.fecha })),
+      detallesExamenes: alumno.examenesHechos.map(e => ({ examen: e.examen?.titulo || `ID ${e.id_examen_teorico}`, nota: e.nota }))
+    };
+  }
+
+  // 2. Obtener estadísticas globales de una práctica
+  async obtenerEstadisticasPractica(id_practica: number) {
+    const realizaciones = await this.realizaRepo.find({ where: { id_practica } });
+    if (realizaciones.length === 0) return { mensaje: 'No hay datos o notas para esta práctica' };
+
+    const notas = realizaciones.map(r => r.nota);
+    const promedio = notas.reduce((a, b) => a + b, 0) / notas.length;
+    const maxNota = Math.max(...notas);
+    const minNota = Math.min(...notas);
+    const aprobados = notas.filter(n => n >= 5).length;
+    const suspensos = notas.filter(n => n < 5).length;
+
+    return {
+      id_practica,
+      totalAlumnosEvaluados: notas.length,
+      notaPromedio: Number(promedio.toFixed(2)),
+      notaMaxima: maxNota,
+      notaMinima: minNota,
+      aprobados,
+      suspensos,
+      porcentajeAprobados: Number(((aprobados / notas.length) * 100).toFixed(2)) + '%'
+    };
+  }
+
+  // 3. Obtener estudiantes que aprobaron un examen teórico
+  async obtenerAlumnosAprobadosExamen(id_examen_teorico: number) {
+    const aprobados = await this.haceRepo.find({
+      where: { id_examen_teorico: id_examen_teorico, nota: MoreThanOrEqual(5) },
+      relations: ['alumno']
+    });
+    return {
+      id_examen: id_examen_teorico,
+      totalAprobados: aprobados.length,
+      alumnos: aprobados.map(a => ({
+        id: a.alumno.id,
+        nombre: `${a.alumno.nombre} ${a.alumno.apellido1}`,
+        nota: a.nota
+      }))
+    };
+  }
+
+  // 4. Obtener estudiantes que suspendieron un examen teórico
+  async obtenerAlumnosSuspensosExamen(id_examen_teorico: number) {
+    const suspensos = await this.haceRepo.find({
+      where: { id_examen_teorico: id_examen_teorico, nota: LessThan(5) },
+      relations: ['alumno']
+    });
+    return {
+      id_examen: id_examen_teorico,
+      totalSuspensos: suspensos.length,
+      alumnos: suspensos.map(a => ({
+        id: a.alumno.id,
+        nombre: `${a.alumno.nombre} ${a.alumno.apellido1}`,
+        nota: a.nota
+      }))
+    };
+  }
 }

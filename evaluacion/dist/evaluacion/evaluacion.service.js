@@ -96,6 +96,80 @@ let EvaluacionService = class EvaluacionService {
     async obtenerDisenaPorIds(id_profesor, id_practica) { return this.disenaRepo.findOne({ where: { id_profesor, id_practica }, relations: ['profesor', 'practica'] }); }
     async actualizarDisena(id_profesor, id_practica, dto) { await this.disenaRepo.update({ id_profesor, id_practica }, dto); return this.obtenerDisenaPorIds(id_profesor, id_practica); }
     async eliminarDisena(id_profesor, id_practica) { return this.disenaRepo.delete({ id_profesor, id_practica }); }
+    async obtenerBoletinNotasAlumno(id_alumno) {
+        const alumno = await this.alumnoRepo.findOne({
+            where: { id: id_alumno },
+            relations: ['practicasRealizadas', 'practicasRealizadas.practica', 'examenesHechos', 'examenesHechos.examen'],
+        });
+        if (!alumno)
+            return { mensaje: 'Alumno no encontrado' };
+        const notasPracticas = alumno.practicasRealizadas.map(p => p.nota);
+        const notasExamenes = alumno.examenesHechos.map(e => e.nota);
+        const promedioPracticas = notasPracticas.length > 0 ? notasPracticas.reduce((a, b) => a + b, 0) / notasPracticas.length : 0;
+        const promedioExamenes = notasExamenes.length > 0 ? notasExamenes.reduce((a, b) => a + b, 0) / notasExamenes.length : 0;
+        const notaFinal = (promedioPracticas * 0.4) + (promedioExamenes * 0.6);
+        return {
+            alumno: `${alumno.nombre} ${alumno.apellido1} ${alumno.apellido2}`,
+            grupo: alumno.grupo,
+            promedioPracticas: Number(promedioPracticas.toFixed(2)),
+            promedioExamenes: Number(promedioExamenes.toFixed(2)),
+            notaFinal: Number(notaFinal.toFixed(2)),
+            estado: notaFinal >= 5 ? 'Aprobado' : 'Suspenso',
+            detallesPracticas: alumno.practicasRealizadas.map(p => ({ practica: p.practica?.titulo || `ID ${p.id_practica}`, nota: p.nota, fecha: p.fecha })),
+            detallesExamenes: alumno.examenesHechos.map(e => ({ examen: e.examen?.titulo || `ID ${e.id_examen_teorico}`, nota: e.nota }))
+        };
+    }
+    async obtenerEstadisticasPractica(id_practica) {
+        const realizaciones = await this.realizaRepo.find({ where: { id_practica } });
+        if (realizaciones.length === 0)
+            return { mensaje: 'No hay datos o notas para esta práctica' };
+        const notas = realizaciones.map(r => r.nota);
+        const promedio = notas.reduce((a, b) => a + b, 0) / notas.length;
+        const maxNota = Math.max(...notas);
+        const minNota = Math.min(...notas);
+        const aprobados = notas.filter(n => n >= 5).length;
+        const suspensos = notas.filter(n => n < 5).length;
+        return {
+            id_practica,
+            totalAlumnosEvaluados: notas.length,
+            notaPromedio: Number(promedio.toFixed(2)),
+            notaMaxima: maxNota,
+            notaMinima: minNota,
+            aprobados,
+            suspensos,
+            porcentajeAprobados: Number(((aprobados / notas.length) * 100).toFixed(2)) + '%'
+        };
+    }
+    async obtenerAlumnosAprobadosExamen(id_examen_teorico) {
+        const aprobados = await this.haceRepo.find({
+            where: { id_examen_teorico: id_examen_teorico, nota: (0, typeorm_2.MoreThanOrEqual)(5) },
+            relations: ['alumno']
+        });
+        return {
+            id_examen: id_examen_teorico,
+            totalAprobados: aprobados.length,
+            alumnos: aprobados.map(a => ({
+                id: a.alumno.id,
+                nombre: `${a.alumno.nombre} ${a.alumno.apellido1}`,
+                nota: a.nota
+            }))
+        };
+    }
+    async obtenerAlumnosSuspensosExamen(id_examen_teorico) {
+        const suspensos = await this.haceRepo.find({
+            where: { id_examen_teorico: id_examen_teorico, nota: (0, typeorm_2.LessThan)(5) },
+            relations: ['alumno']
+        });
+        return {
+            id_examen: id_examen_teorico,
+            totalSuspensos: suspensos.length,
+            alumnos: suspensos.map(a => ({
+                id: a.alumno.id,
+                nombre: `${a.alumno.nombre} ${a.alumno.apellido1}`,
+                nota: a.nota
+            }))
+        };
+    }
 };
 exports.EvaluacionService = EvaluacionService;
 exports.EvaluacionService = EvaluacionService = __decorate([

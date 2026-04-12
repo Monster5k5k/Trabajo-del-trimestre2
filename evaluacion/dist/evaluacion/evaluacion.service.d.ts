@@ -51,4 +51,71 @@ export declare class EvaluacionService {
     obtenerDisenaPorIds(id_profesor: number, id_practica: number): Promise<Disena | null>;
     actualizarDisena(id_profesor: number, id_practica: number, dto: ActualizarDisenaDto): Promise<Disena | null>;
     eliminarDisena(id_profesor: number, id_practica: number): Promise<import("typeorm").DeleteResult>;
+    obtenerBoletinNotasAlumno(id_alumno: number): Promise<{
+        mensaje: string;
+        alumno?: undefined;
+        grupo?: undefined;
+        promedioPracticas?: undefined;
+        promedioExamenes?: undefined;
+        notaFinal?: undefined;
+        estado?: undefined;
+        detallesPracticas?: undefined;
+        detallesExamenes?: undefined;
+    } | {
+        alumno: string;
+        grupo: string;
+        promedioPracticas: number;
+        promedioExamenes: number;
+        notaFinal: number;
+        estado: string;
+        detallesPracticas: {
+            practica: string;
+            nota: number;
+            fecha: Date;
+        }[];
+        detallesExamenes: {
+            examen: string;
+            nota: number;
+        }[];
+        mensaje?: undefined;
+    }>;
+    obtenerEstadisticasPractica(id_practica: number): Promise<{
+        mensaje: string;
+        id_practica?: undefined;
+        totalAlumnosEvaluados?: undefined;
+        notaPromedio?: undefined;
+        notaMaxima?: undefined;
+        notaMinima?: undefined;
+        aprobados?: undefined;
+        suspensos?: undefined;
+        porcentajeAprobados?: undefined;
+    } | {
+        id_practica: number;
+        totalAlumnosEvaluados: number;
+        notaPromedio: number;
+        notaMaxima: number;
+        notaMinima: number;
+        aprobados: number;
+        suspensos: number;
+        porcentajeAprobados: string;
+        mensaje?: undefined;
+    }>;
+    obtenerAlumnosAprobadosExamen(id_examen_teorico: number): Promise<{
+        id_examen: number;
+        totalAprobados: number;
+        alumnos: {
+            id: number;
+            nombre: string;
+            nota: number;
+        }[];
+    }>;
+    obtenerAlumnosSuspensosExamen(id_examen_teorico: number): Promise<{
+        id_examen: number;
+        totalSuspensos: number;
+        alumnos: {
+            id: number;
+            nombre: string;
+            nota: number;
+        }[];
+    }>;
 }

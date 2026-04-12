@@ -149,4 +149,26 @@ export class EvaluacionController {
   eliminarDisena(@Param('id_profesor', ParseIntPipe) id_profesor: number, @Param('id_practica', ParseIntPipe) id_practica: number) {
     return this.service.eliminarDisena(id_profesor, id_practica);
   }
+
+  // ================= FUNCIONES AVANZADAS (ESTADÍSTICAS Y REPORTES) =================
+
+  @Get('reporte/boletin/:id_alumno')
+  obtenerBoletinNotasAlumno(@Param('id_alumno', ParseIntPipe) id_alumno: number) {
+    return this.service.obtenerBoletinNotasAlumno(id_alumno);
+  }
+
+  @Get('reporte/estadisticas-practica/:id_practica')
+  obtenerEstadisticasPractica(@Param('id_practica', ParseIntPipe) id_practica: number) {
+    return this.service.obtenerEstadisticasPractica(id_practica);
+  }
+
+  @Get('reporte/examen-aprobados/:id_examen')
+  obtenerAlumnosAprobadosExamen(@Param('id_examen', ParseIntPipe) id_examen: number) {
+    return this.service.obtenerAlumnosAprobadosExamen(id_examen);
+  }
+
+  @Get('reporte/examen-suspensos/:id_examen')
+  obtenerAlumnosSuspensosExamen(@Param('id_examen', ParseIntPipe) id_examen: number) {
+    return this.service.obtenerAlumnosSuspensosExamen(id_examen);
+  }
 }

@@ -74,6 +74,18 @@ let EvaluacionController = class EvaluacionController {
     eliminarDisena(id_profesor, id_practica) {
         return this.service.eliminarDisena(id_profesor, id_practica);
     }
+    obtenerBoletinNotasAlumno(id_alumno) {
+        return this.service.obtenerBoletinNotasAlumno(id_alumno);
+    }
+    obtenerEstadisticasPractica(id_practica) {
+        return this.service.obtenerEstadisticasPractica(id_practica);
+    }
+    obtenerAlumnosAprobadosExamen(id_examen) {
+        return this.service.obtenerAlumnosAprobadosExamen(id_examen);
+    }
+    obtenerAlumnosSuspensosExamen(id_examen) {
+        return this.service.obtenerAlumnosSuspensosExamen(id_examen);
+    }
 };
 exports.EvaluacionController = EvaluacionController;
 __decorate([
@@ -330,6 +342,34 @@ __decorate([
     __metadata("design:paramtypes", [Number, Number]),
     __metadata("design:returntype", void 0)
 ], EvaluacionController.prototype, "eliminarDisena", null);
+__decorate([
+    (0, common_1.Get)('reporte/boletin/:id_alumno'),
+    __param(0, (0, common_1.Param)('id_alumno', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], EvaluacionController.prototype, "obtenerBoletinNotasAlumno", null);
+__decorate([
+    (0, common_1.Get)('reporte/estadisticas-practica/:id_practica'),
+    __param(0, (0, common_1.Param)('id_practica', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], EvaluacionController.prototype, "obtenerEstadisticasPractica", null);
+__decorate([
+    (0, common_1.Get)('reporte/examen-aprobados/:id_examen'),
+    __param(0, (0, common_1.Param)('id_examen', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], EvaluacionController.prototype, "obtenerAlumnosAprobadosExamen", null);
+__decorate([
+    (0, common_1.Get)('reporte/examen-suspensos/:id_examen'),
+    __param(0, (0, common_1.Param)('id_examen', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], EvaluacionController.prototype, "obtenerAlumnosSuspensosExamen", null);
 exports.EvaluacionController = EvaluacionController = __decorate([
     (0, common_1.Controller)('evaluacion'),
     __metadata("design:paramtypes", [evaluacion_service_1.EvaluacionService])
